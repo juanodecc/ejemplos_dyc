@@ -139,7 +139,7 @@ time = np.linspace(0,tf,n)
 
 #t = np.arange(0,2,0.01)
 u = np.zeros(time.size)
-x0 = [0, 0, np.radians(1), 0]
+x0 = [0, 0, np.radians(20), 0]
 
 t1,y1,x1 =ctrl.forced_response(sys_cl1,U=u,T=time,X0=x0,return_x=True)
 x=y1[0,:];
@@ -170,8 +170,8 @@ x2b = 1.05*np.sin(theta_a)+x1
 y2 = 1*np.cos(theta_a)-y1
 y2b = 1.05*np.cos(theta_a)-y1
 
-plt.plot(time,x2)
-plt.grid()
+#plt.plot(time,x2)
+#plt.grid()
 ```
 
 ```{code-cell} ipython3
@@ -181,12 +181,14 @@ plt.grid()
 
 fig = plt.figure(figsize=(8,6.4))
 ax = fig.add_subplot(111,autoscale_on=False,\
-                     xlim=(-1.8,0.8),ylim=(-0.4,1.2))
+                     xlim=(-1.8,1.8),ylim=(-0.4,1.2))
 ax.set_xlabel('position')
 ax.get_yaxis().set_visible(False)
 
-crane_rail, = ax.plot([-2.0,1.0],[-0.2,-0.2],'k-',lw=4)
+crane_rail, = ax.plot([-2.0,2.0],[-0.2,-0.2],'k-',lw=4)
 start, = ax.plot([-1,-1],[-1.5,1.5],'k:',lw=2)
+pos2, = ax.plot([1,1],[-1.5,1.5],'k:',lw=2)
+
 objective, = ax.plot([0,0],[-0.5,1.5],'k:',lw=2)
 mass1, = ax.plot([],[],linestyle='None',marker='s',\
                  markersize=40,markeredgecolor='k',\
@@ -201,7 +203,7 @@ time_template = 'time = %.1fs'
 time_text = ax.text(0.05,0.9,'',transform=ax.transAxes)
 wgt_template = 'weight = %.1f'
 wgt_text = ax.text(0.75,0.9,'',transform=ax.transAxes)
-start_text = ax.text(-1.06,-0.3,'start',ha='right')
+#start_text = ax.text(-1.06,-0.3,'pos1',ha='right')
 end_text = ax.text(0.06,-0.3,'objective',ha='left')
 
 def init():
