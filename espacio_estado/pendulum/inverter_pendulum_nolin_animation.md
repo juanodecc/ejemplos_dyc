@@ -5,7 +5,7 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.15.2
+    jupytext_version: 1.15.1
 kernelspec:
   display_name: Python 3 (ipykernel)
   language: python
@@ -209,7 +209,7 @@ $$(I+ml^2)\ddot{\theta}+mgl\sin\theta=-ml\ddot{x}\cos\theta $$
 def pendulo_derivs(t, x, u, params):
     # Parámetros, tienen valores por defecto
     M=params.get('M', 0.5)#kg
-    m=params.get('m', 2)#kg
+    m=params.get('m', 0.2)#kg
     b=params.get('b', 0.1)
     #I=params.get('I', 0.006)
     g=params.get('g', 9.8)#m/s^2
@@ -296,17 +296,19 @@ y2b = 1.05*np.cos(theta_a)-y1
 
 # Pendulum animation by Everton Colling
 
-fig = plt.figure(figsize=(8,6.4))
+fig = plt.figure(figsize=(8,8))
 ax = fig.add_subplot(111,autoscale_on=False,\
-                     xlim=(-1.8,1.8),ylim=(-0.4,1.2))
+                     xlim=(-2,2),ylim=(-2,2))
 ax.set_xlabel('position')
+ax.set_aspect('equal', adjustable='box')
 ax.get_yaxis().set_visible(False)
 
 crane_rail, = ax.plot([-2.0,2.0],[-0.2,-0.2],'k-',lw=4)
-start, = ax.plot([-1,-1],[-1.5,1.5],'k:',lw=2)
-pos2, = ax.plot([1,1],[-1.5,1.5],'k:',lw=2)
 
-objective, = ax.plot([0,0],[-0.5,1.5],'k:',lw=2)
+start, = ax.plot([-1,-1],[-2,2],'k:',lw=2)
+pos2, = ax.plot([1,1],[-2,2],'k:',lw=2)
+objective, = ax.plot([0,0],[-2,2],'k:',lw=2)
+
 mass1, = ax.plot([],[],linestyle='None',marker='s',\
                  markersize=40,markeredgecolor='k',\
                  color='orange',markeredgewidth=2)
