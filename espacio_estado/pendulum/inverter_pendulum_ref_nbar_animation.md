@@ -90,11 +90,7 @@ I = 0.006
 g = 9.8
 l = 0.3
 p = I*(M+m)+M*m*l**2;
-
-a22 = -((I+m*l**2)*b/p)
-a23 = ((m**2*g*l**2)/p)
-b2  = ((I+m*l**2)/p)
-a22,a23,b2
+p
 ```
 
 ```{code-cell} ipython3
@@ -126,18 +122,24 @@ pendulo
 ctrl.pzmap(pendulo)
 ```
 
-## Sistema lineal usando NonlinearIOSystem
+```{code-cell} ipython3
+((m**2*g*l**2)/p),((I+m*l**2)/p)
+```
+
+## Modelo del sistema lineal usando NonlinearIOSystem
 
 ```{code-cell} ipython3
 def pendulum_lin_derivs(t, x, u, params):
     # Parámetros, tienen valores por defecto
     M=params.get('M', 0.5)#kg
-    m=params.get('m', 2)#kg
+    m=params.get('m', 0.2)#kg
     b=params.get('b', 0.1)
     I=params.get('I', 0.006)
     g=params.get('g', 9.8)#m/s^2
     l=params.get('l', 0.3)#m
-        
+    
+    p = I*(M+m)+M*m*l**2;
+    
     # variables de estado
     pos       = x[0]#m
     vel       = x[1]#m/s
@@ -148,13 +150,11 @@ def pendulum_lin_derivs(t, x, u, params):
     F = u[0] #[N] if u[0] > 0 else 0 # solo caudales positivos
 
     #calculo de la derivada de x, x_dot, theta, theta_dot... dh/dt
-    dpos       = vel #x1_dot
-    #dvel       = -((I+m*l**2)*b/p)*vel+((m**2*g*l**2)/p)*theta+((I+m*l**2)/p)*F
-    dvel       = -.182*vel+2.67*theta+1.82*F#
-    #dvel       = a22*vel+a23*theta+b2*F#
+    dpos       = vel+random.normalvariate(0,0.1) #x1_dot
+    dvel       = -((I+m*l**2)*b/p)*vel+((m**2*g*l**2)/p)*theta+((I+m*l**2)/p)*F #dvel       = -.182*vel+2.67*theta+1.82*F#
     dtheta     = theta_dot
-    dtheta_dot = -.455*vel+31.2*theta+4.55*F
-    #dtheta_dot = -(m*l*b)/p*vel+m*g*l*(M+m)/p*theta+m*l/p*F
+    dtheta_dot = -(m*l*b)/p*vel+m*g*l*(M+m)/p*theta+m*l/p*F    #dtheta_dot = -.455*vel+31.2*theta+4.55*F
+
     return np.array([dpos, dvel, theta_dot, dtheta_dot])
 
 def pendulum_lin_outputs(t, x, u, params):
@@ -229,8 +229,8 @@ sys_cl1.pole()
 ```
 
 ```{code-cell} ipython3
-n = 300
-tf = 10
+n = 1000
+tf = 4
 time = np.linspace(0,tf,n)
 
 u = np.zeros(time.size)#np.ones(time.size)*.2
@@ -301,25 +301,99 @@ outputs = ['u_est']
 #regulador con estimador total ley de control u=-k*x_est + estimador total
 controlador = ctrl.ss(Ae,Be,Ce,De, states=states, inputs=inputs, outputs=outputs)
 controlador
+```
 
+```{code-cell} ipython3
+ctrl.pzmap(controlador)
+```
+
+Vemos que el controlador tiene 1 polo en C+
+
+```{code-cell} ipython3
 G_L = ctrl.interconnect([pendulo,controlador],inputs=['u'],outputs=['u_est'])
 G_L = -G_L
 ctrl.pzmap(G_L)
 ```
 
 ```{code-cell} ipython3
-ctrl.bode(G_L,dB=True,margins=True);
+plt.figure()
+m,p,w=ctrl.bode(G_L,dB=False,margins=True,omega_limits=[5,1000]);
+```
+
+gm :  Gain margin
+
+pm :  Phase margin
+
+sm :  Stability margin, the minimum distance from the Nyquist plot to -1
+
+wpc : Phase crossover frequency (where phase crosses -180 degrees), which is associated with the gain margin.
+
+wgc : Gain crossover frequency (where gain crosses 1), which is associated with the phase margin.
+
+wms : Stability margin frequency (where Nyquist plot is closest to -1)
+
+```{code-cell} ipython3
+gm,pm,sm,wpc,wgc,wms=ctrl.stability_margins(G_L)
+print('MG = ',gm,'MF',pm,'omega de corte = ',wpc,wgc)
 ```
 
 ```{code-cell} ipython3
-ctrl.stability_margins(G_L)
+plt.figure()
+T = ctrl.feedback(G_L)
+m,p,w=ctrl.bode(T,dB=False,margins=False);
+ctrl.bandwidth(T)
 ```
 
 ```{code-cell} ipython3
-ctrl.nyquist(G_L)
+plt.figure();
+ctrl.nyquist(G_L);
+
+plt.figure();
+ctrl.nyquist(G_L,omega_limits=[8,1000])
+```
+
+En este caso el sistema es estable N= -2 y 2 polos en C+ P=2 por lo que Z=0 => es estable
+
+```{code-cell} ipython3
+plt.figure();
+fig, ax = plt.subplots()
+circle = plt.Circle((0, 0), 1, color='r', fill=False)
+ax.plot(np.real(G_L(w*1j)),np.imag(G_L(w*1j)))
+ax.add_patch(circle)
+ax.grid()
+```
+
+```{code-cell} ipython3
+Td = np.deg2rad(5)/8 #queiro retraso de fase en theta_d = -Td*w, en aprox. w1=8rad/s quiero un retardo de 5deg
+Td
+```
+
+```{code-cell} ipython3
+p_ret = p-Td*w #delayed phase
+
+z=m * np.exp( 1j * p )
+z_ret=m * np.exp( 1j * (p_ret) )
+```
+
+```{code-cell} ipython3
+plt.semilogx(w,np.rad2deg(p),w,np.rad2deg(p_ret),w,-180*np.ones(w.size),'k--')
+plt.grid()
+```
+
+```{code-cell} ipython3
+plt.figure();
+plt.plot(np.real(z),np.imag(z),np.real(z_ret),np.imag(z_ret))
+plt.grid()
+```
+
+```{code-cell} ipython3
+fig, ax = plt.subplots(subplot_kw={'projection': 'polar'})
+ax.plot(p, m,p-((Td)*w), m)
 ```
 
 ### Implementación usando Interconnect
+
+conecto el péndulo creado por la función ss y realimento con el estimador total
 
 ```{code-cell} ipython3
 pendulo_reg = ctrl.interconnect([pendulo,reg_est_tot],inputs=['u'],outputs=['x'])
@@ -331,12 +405,10 @@ ctrl.pzmap(pendulo_reg)
 ```
 
 ```{code-cell} ipython3
-n = 1000
-tf = 1
-time = np.linspace(0,tf,n)
+escalon=.2# defino la magnitud del escalón, arranco con 20cm
 
-u = np.ones(time.size)*.2 #escalón de 20cm
-x0 = [0, 0, 0, 0 ,0,0,0,0]
+u = np.ones(time.size)*escalon #escalón de 20cm
+x0 = [0, 0, 0, 0 ,0 ,0 , 0, 0]
 
 t1,y1,x1 =ctrl.forced_response(pendulo_reg,U=u[0],T=time,X0=x0,return_x=True)
 ```
@@ -354,11 +426,11 @@ plt.ylabel('Posición (m)')
 ```
 
 ```{code-cell} ipython3
-ctrl.step_info(pendulo_reg*.2,T=time)
+ctrl.step_info(pendulo_reg*escalon,T=time)
 ```
 
-### Simulación con modelo NonlinearIOSystem
-La idea fue agregar salida con ruido de medición para $x$ y $\theta$, pero me da loop algebraico y no lo pude resolver. Lo único que se puede mostrar es que la respuesta da lo mismo que antes. El problema esta al realimentar con la señal con ruido.
+### Simulación con el modelo lineal usando la función NonlinearIOSystem
+La idea desde el principio fue agregar a la salida ruido de medición tanto para $x$, como para $\theta$, pero me da loop algebráico cuando lo pongo en la función de la salida, luego (de mucho renegar) lo puse directamente sobre el cálculo de $\frac{dx}{dt}$ y funcionó a al perfección.
 
 ```{code-cell} ipython3
 pendulo_noise = ctrl.interconnect([io_pendulum_lin,reg_est_tot],inputs=['u'],outputs=['x'])
@@ -366,14 +438,10 @@ pendulo_noise
 ```
 
 ```{code-cell} ipython3
-#n = 1000
-#tf = 2
-time = np.linspace(0,tf,n)
+u = np.ones(time.size)*escalon #escalón de 20cm
+x0 = [0, 0, 0, 0 ,0, 0, 0, 0]
 
-u = np.ones(time.size)*.2 #escalón de 20cm
-x0 = [0, 0, 0, 0 ,0,0,0,0]
-
-t2,y2=ctrl.input_output_response(pendulo_noise, T=time, U=u[0], X0=x0,solve_ivp_method ='RK45')
+t2,y2=ctrl.input_output_response(pendulo_noise, T=time, U=u[0], X0=x0)#,solve_ivp_method ='BDF')
 y2.shape,t2.shape
 ```
 
@@ -391,21 +459,24 @@ plt.ylabel('Posicion (m)')
 
 ## Introducción de entrada de referencia
 
+Simplemente agrego un $\bar{N}$
+
 ```{code-cell} ipython3
 Nbar = 1/np.real(pendulo_reg(0))
 Nbar
 ```
 
+### El péndulo con regulador
+
+probamos el mas fácil...
+
 ```{code-cell} ipython3
-
-#n = 300
-#tf = 1
-time = np.linspace(0,tf,n)
-
-u = np.ones(time.size)*.5 #escalón de 50cm
+u = np.ones(time.size)*escalon*Nbar #escalón de 20cm
 x0 = [0, 0, 0, 0 ,0,0,0,0]
+```
 
-t3,y3,x3 =ctrl.forced_response(pendulo_reg,U=u[0]*Nbar,T=time,X0=x0,return_x=True)
+```{code-cell} ipython3
+t3,y3,x3 =ctrl.forced_response(pendulo_reg,U=u[0],T=time,X0=x0,return_x=True)
 ```
 
 ```{code-cell} ipython3
@@ -420,6 +491,18 @@ plt.xlabel('Tiempo (sec)')
 plt.ylabel('Posición (m)')
 ```
 
+```{code-cell} ipython3
+t4,y4=ctrl.input_output_response(pendulo_noise, T=time, U=u[0], X0=x0)#,solve_ivp_method ='BDF')
+y4.shape,t4.shape
+```
+
+```{code-cell} ipython3
+plt.plot(t4,y4,t3,y3)
+plt.grid()
+plt.xlabel('Tiempo (sec)')
+plt.ylabel('Posición (m)')
+```
+
 ## Animación
 
 ```{code-cell} ipython3
@@ -428,7 +511,7 @@ plt.ylabel('Posición (m)')
 m2 = np.ones(n)
 
 
-x1 = x
+x1 = y4
 y1 = np.zeros(len(time))
 
 #suppose that l = 1
@@ -448,7 +531,7 @@ ax.get_yaxis().set_visible(False)
 crane_rail, = ax.plot([-2.0,2.0],[-0.2,-0.2],'k-',lw=4)
 start, = ax.plot([-1,-1],[-1.5,1.5],'k:',lw=2)
 pos2, = ax.plot([1,1],[-1.5,1.5],'k:',lw=2)
-pos_p5, = ax.plot([.5,.5],[-1.5,1.5],'k:',lw=2)
+pos_p5, = ax.plot([.2,.2],[-1.5,1.5],'r:',lw=2)
 
 objective, = ax.plot([0,0],[-0.5,1.5],'k:',lw=2)
 mass1, = ax.plot([],[],linestyle='None',marker='s',\
@@ -494,4 +577,8 @@ ani_a = animation.FuncAnimation(fig, animate, \
 #ani_a.save('Pendulum_Control.mp4',fps=30)
 #ani_a.save('animation.gif', writer='PillowWriter', fps=30)
 plt.show()
+```
+
+```{code-cell} ipython3
+
 ```
