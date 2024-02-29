@@ -5,14 +5,14 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.15.2
+    jupytext_version: 1.14.5
 kernelspec:
   display_name: Python 3 (ipykernel)
   language: python
   name: python3
 ---
 
-# Péndulo intervertido.
+# Péndulo invertido.
 
 Parámetros:
 
@@ -38,7 +38,7 @@ Parámetros:
 
 ## Esquema
 
-![Pendulo invertido](pendulum2.png)
+![Péndulo invertido](pendulum2.png)
 
 +++
 
@@ -48,16 +48,22 @@ Parámetros:
 
 $$
 \left[{\begin{array}{c}
-  \dot{x}\\ \ddot{x}\\ \dot{\phi}\\ \ddot{\phi}
+  \dot{x}\\
+  \ddot{x}\\
+  \dot{\phi}\\
+  \ddot{\phi}
 \end{array}}\right] =
 \left[{\begin{array}{cccc}
-  0&1&0&0\\
-  0&\frac{-(I+ml^2)b}{I(M+m)+Mml^2}&\frac{m^2gl^2}{I(M+m)+Mml^2}&0\\
-  0&0&0&1\\
-  0&\frac{-mlb}{I(M+m)+Mml^2}&\frac{mgl(M+m)}{I(M+m)+Mml^2}&0
+  0 & 1 & 0 & 0 \\
+  0 &\frac{-(I+ml^2)b}{I(M+m)+Mml^2}&\frac{m^2gl^2}{I(M+m)+Mml^2}&0\\
+  0 & 0 & 0 & 1\\
+  0 &\frac{-mlb}{I(M+m)+Mml^2}&\frac{mgl(M+m)}{I(M+m)+Mml^2}&0
 \end{array}}\right]
 \left[{\begin{array}{c}
-  x\\ \dot{x}\\ \phi\\ \dot{\phi}
+  x\\
+  \dot{x}\\
+  \phi\\
+  \dot{\phi}
 \end{array}}\right]+
 \left[{\begin{array}{c}0\\
   \frac{I+ml^2}{I(M+m)+Mml^2}\\
@@ -67,13 +73,18 @@ $$
 
 $${\bf y} =
 \left[{\begin{array}{cccc}
-  1&0&0&0\\0&0&1&0
+  1 & 0 & 0 & 0\\
+  0 & 0 & 1 & 0
 \end{array}}\right]
 \left[{\begin{array}{c}
-  x\\ \dot{x}\\ \phi\\ \dot{\phi}
+  x\\
+  \dot{x}\\
+  \phi\\
+  \dot{\phi}
 \end{array}}\right]+
 \left[{\begin{array}{c}
-  0\\0
+  0 \\
+  0
 \end{array}}\right]u$$
 
 ```{code-cell} ipython3
@@ -148,7 +159,7 @@ plt.plot(t1,x)#pos
 plt.plot(t1,theta_a)#angulo en rad
 plt.grid()
 plt.xlabel('Time (sec)')
-plt.ylabel('Angular Posicion (rad)/ Posicion (m)')
+plt.ylabel('Angular Posición (rad)/ Posición (m)')
 ```
 
 ```{code-cell} ipython3
@@ -179,9 +190,10 @@ y2b = 1.05*np.cos(theta_a)-y1
 
 # Pendulum animation by Everton Colling
 
-fig = plt.figure(figsize=(8,6.4))
+fig = plt.figure(figsize=(36,16))
 ax = fig.add_subplot(111,autoscale_on=False,\
                      xlim=(-1.8,1.8),ylim=(-0.4,1.2))
+ax.set_aspect(1)
 ax.set_xlabel('position')
 ax.get_yaxis().set_visible(False)
 
@@ -192,11 +204,11 @@ pos2, = ax.plot([1,1],[-1.5,1.5],'k:',lw=2)
 objective, = ax.plot([0,0],[-0.5,1.5],'k:',lw=2)
 mass1, = ax.plot([],[],linestyle='None',marker='s',\
                  markersize=40,markeredgecolor='k',\
-                 color='orange',markeredgewidth=2)
+                 color='blue',markeredgewidth=2)
 mass2, = ax.plot([],[],linestyle='None',marker='o',\
                  markersize=20,markeredgecolor='k',\
-                 color='orange',markeredgewidth=2)
-line, = ax.plot([],[],'o-',color='orange',lw=4,\
+                 color='red',markeredgewidth=2)
+line, = ax.plot([],[],'o-',color='black',lw=4,\
                 markersize=6,markeredgecolor='k',\
                 markerfacecolor='k')
 time_template = 'time = %.1fs'
