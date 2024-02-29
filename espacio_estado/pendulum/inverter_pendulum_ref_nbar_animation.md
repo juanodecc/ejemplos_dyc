@@ -65,7 +65,8 @@ $$
 
 $${\bf y} =
 \left[{\begin{array}{cccc}
-  1&0&0&0\\0&0&1&0
+  1 & 0 & 0 & 0 \\
+  0 & 0 & 1 &0
 \end{array}}\right]
 \left[{\begin{array}{c}
   x\\ \dot{x}\\ \phi\\ \dot{\phi}
@@ -120,10 +121,6 @@ pendulo
 
 ```{code-cell} ipython3
 ctrl.pzmap(pendulo)
-```
-
-```{code-cell} ipython3
-((m**2*g*l**2)/p),((I+m*l**2)/p)
 ```
 
 ## Modelo del sistema lineal usando NonlinearIOSystem
