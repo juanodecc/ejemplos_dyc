@@ -46,16 +46,22 @@ Parámetros:
 
 $$
 \left[{\begin{array}{c}
-  \dot{x}\\ \ddot{x}\\ \dot{\phi}\\ \ddot{\phi}
+  \dot{x}\\
+  \ddot{x}\\
+  \dot{\phi}\\
+  \ddot{\phi}
 \end{array}}\right] =
 \left[{\begin{array}{cccc}
-  0&1&0&0\\
-  0&\frac{-(I+ml^2)b}{I(M+m)+Mml^2}&\frac{m^2gl^2}{I(M+m)+Mml^2}&0\\
-  0&0&0&1\\
-  0&\frac{-mlb}{I(M+m)+Mml^2}&\frac{mgl(M+m)}{I(M+m)+Mml^2}&0
+  0 & 1 & 0 & 0 \\
+  0 &\frac{-(I+ml^2)b}{I(M+m)+Mml^2}&\frac{m^2gl^2}{I(M+m)+Mml^2}&0\\
+  0 & 0 & 0 & 1\\
+  0 &\frac{-mlb}{I(M+m)+Mml^2}&\frac{mgl(M+m)}{I(M+m)+Mml^2}&0
 \end{array}}\right]
 \left[{\begin{array}{c}
-  x\\ \dot{x}\\ \phi\\ \dot{\phi}
+  x\\
+  \dot{x}\\
+  \phi\\
+  \dot{\phi}
 \end{array}}\right]+
 \left[{\begin{array}{c}0\\
   \frac{I+ml^2}{I(M+m)+Mml^2}\\
@@ -69,10 +75,14 @@ $${\bf y} =
   0 & 0 & 1 &0
 \end{array}}\right]
 \left[{\begin{array}{c}
-  x\\ \dot{x}\\ \phi\\ \dot{\phi}
+  x \\
+  \dot{x} \\
+   \phi \\
+    \dot{\phi}
 \end{array}}\right]+
 \left[{\begin{array}{c}
-  0\\0
+  0 \\
+  0
 \end{array}}\right]u$$
 
 ```{code-cell} ipython3
