@@ -5,14 +5,14 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.15.1
+    jupytext_version: 1.15.2
 kernelspec:
   display_name: Python 3 (ipykernel)
   language: python
   name: python3
 ---
 
-# Péndulo intervertido
+# Péndulo invertido
 
 Parámetros:
 
@@ -89,7 +89,7 @@ b = 0.1
 I = 0.006
 g = 9.8
 l = 0.3
-p = I*(M+m)+M*m*l**2;
+p = I*(M+m)+M*m*I**2
 ```
 
 ```{code-cell} ipython3
@@ -122,7 +122,7 @@ ctrl.pzmap(pendulo)
 ```
 
 ## Diseño de la ley de control
-elegi lo poslos en forma arbitraria
+elegí lo polos en forma arbitraria
 
 ```{code-cell} ipython3
 p1 = -10 + 10j;
@@ -251,14 +251,14 @@ pendulum_nolin_lc=ctrl.interconnect([io_pendulo,reg_est_tot])
 ```
 
 ```{code-cell} ipython3
-n = 300
-tf = 10
+n = 100000
+tf = 100
 time = np.linspace(0,tf,n)
 
 u = np.zeros(time.size)
 x0 = [0, 0, 0.1, 0]
 
-t1,y1 = ctrl.input_output_response(io_pendulo, time, u[0], x0)
+t1,y1 = ctrl.input_output_response(io_pendulo, time, u[0], x0,solve_ivp_method='BDF')
 x=y1[0,:];
 theta_a=y1[1,:];
 plt.figure()
@@ -311,7 +311,7 @@ objective, = ax.plot([0,0],[-2,2],'k:',lw=2)
 
 mass1, = ax.plot([],[],linestyle='None',marker='s',\
                  markersize=40,markeredgecolor='k',\
-                 color='orange',markeredgewidth=2)
+                 color='blue',markeredgewidth=2)
 mass2, = ax.plot([],[],linestyle='None',marker='o',\
                  markersize=20,markeredgecolor='k',\
                  color='orange',markeredgewidth=2)
@@ -323,7 +323,7 @@ time_text = ax.text(0.05,0.9,'',transform=ax.transAxes)
 wgt_template = 'weight = %.1f'
 wgt_text = ax.text(0.75,0.9,'',transform=ax.transAxes)
 #start_text = ax.text(-1.06,-0.3,'pos1',ha='right')
-end_text = ax.text(0.06,-0.3,'objective',ha='left')
+#end_text = ax.text(0.06,-0.3,'objective',ha='left')
 
 def init():
     mass1.set_data([],[])
